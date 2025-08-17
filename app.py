@@ -51,8 +51,17 @@ if len(row_data) >= 10:
     except Exception as e:
         st.error(f"Prediction error: {e}")
 
-# เรียก JS ฟังก์ชันเมื่อมีผลลัพธ์
-call_show_prediction_js = f"showPrediction({predicted_percent});" if predicted_percent > 0 else ""
+# เรียก JS ฟังก์ชันเมื่อมีผลลัพธ์ หรือแสดงสถานะเริ่มต้น
+if len(row_data) >= 10:
+    # มีข้อมูลใหม่ - แสดงผลลัพธ์ใหม่และบันทึก
+    call_show_prediction_js = f"showPrediction({predicted_percent});"
+    st.session_state.last_prediction = predicted_percent
+elif 'last_prediction' in st.session_state and st.session_state.last_prediction > 0:
+    # ไม่มีข้อมูลใหม่ แต่มีผลลัพธ์ล่าสุด - แสดงผลลัพธ์ล่าสุด
+    call_show_prediction_js = f"showPrediction({st.session_state.last_prediction});"
+else:
+    # ไม่มีข้อมูลและไม่มีผลลัพธ์ล่าสุด - แสดงสถานะรอ
+    call_show_prediction_js = "showDefaultState();"
 
 # ซ่อน Header / Footer / Menu ของ Streamlit
 st.markdown("""
@@ -177,16 +186,23 @@ html_code = f"""
 
       advice += `<br><img src="${{imgSrc}}" alt="${{imgAlt}}">`;
 
-      adviceEl.innerHTML = advice;
-      confEl.innerHTML = `Confidence: ${{value}}%`;
-    }}
+             adviceEl.innerHTML = advice;
+       confEl.innerHTML = `Confidence: ${{value}}%`;
+     }}
 
-    {call_show_prediction_js}
+     function showDefaultState() {{
+       const adviceEl = document.getElementById('advice');
+       const confEl = document.getElementById('confidence');
+       
+       adviceEl.innerHTML = '<span style="font-size: 1.4em; color: #666;">รอข้อมูล...</span>';
+       confEl.innerHTML = '';
+     }}
+
+     {call_show_prediction_js}
   </script>
 </body>
 </html>
 """
 
 st.components.v1.html(html_code, height=700, scrolling=False)
-
 
