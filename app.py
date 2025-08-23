@@ -36,8 +36,6 @@ def img_to_base64_str(path):
 img0_b64 = img_to_base64_str("guava0.png")
 img1_b64 = img_to_base64_str("guava1.png")
 img3_b64 = img_to_base64_str("guava3.png")
-fruitsafe_b64 = img_to_base64_str("FruitSafe.jpg")
-poster_b64 = img_to_base64_str("Poster.jpg")
 
 predicted_percent = 0  # ค่าเริ่มต้น
 
@@ -53,17 +51,8 @@ if len(row_data) >= 10:
     except Exception as e:
         st.error(f"Prediction error: {e}")
 
-# เรียก JS ฟังก์ชันเมื่อมีผลลัพธ์ หรือแสดงสถานะเริ่มต้น
-if len(row_data) >= 10:
-    # มีข้อมูลใหม่ - แสดงผลลัพธ์ใหม่และบันทึก
-    call_show_prediction_js = f"showPrediction({predicted_percent});"
-    st.session_state.last_prediction = predicted_percent
-elif 'last_prediction' in st.session_state and st.session_state.last_prediction > 0:
-    # ไม่มีข้อมูลใหม่ แต่มีผลลัพธ์ล่าสุด - แสดงผลลัพธ์ล่าสุด
-    call_show_prediction_js = f"showPrediction({st.session_state.last_prediction});"
-else:
-    # ไม่มีข้อมูลและไม่มีผลลัพธ์ล่าสุด - แสดงสถานะรอ
-    call_show_prediction_js = "showDefaultState();"
+# เรียก JS ฟังก์ชันเมื่อมีผลลัพธ์
+call_show_prediction_js = f"showPrediction({predicted_percent});" if predicted_percent > 0 else ""
 
 # ซ่อน Header / Footer / Menu ของ Streamlit
 st.markdown("""
@@ -73,24 +62,6 @@ st.markdown("""
     footer {visibility: hidden;}
     [data-testid="stAppViewContainer"] {
         background-color: #fefae0;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    [data-testid="stAppViewBlockContainer"] {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    .main .block-container {
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: none !important;
-    }
-    .stApp {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    .stApp > header {
-        display: none !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -119,8 +90,8 @@ html_code = f"""
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      padding: 0 10px;
+      justify-content: center;
+      padding: 10px;
       height: 100vh;
       box-sizing: border-box;
       user-select: none;
@@ -129,29 +100,28 @@ html_code = f"""
 
     .logo {{
       font-family: 'Merriweather', serif;
-      font-size: 36px;
+      font-size: 28px;
       color: #2e7d32;
       text-align: center;
       margin-bottom: 15px;
-      margin-top: 0px;
     }}
 
     .results-label {{
       color: #e67e22;
-      font-size: 22px;
-      margin-bottom: 15px;
+      font-size: 18px;
+      margin-bottom: 8px;
       border-top: 2px solid #c5e1a5;
       border-bottom: 2px solid #c5e1a5;
-      padding: 6px 16px;
+      padding: 4px 12px;
     }}
 
     .advice {{
-      font-size: 16px;
+      font-size: 14px;
       color: #333;
       text-align: center;
       max-width: 90vw;
-      margin-top: 15px;
-      min-height: 180px;
+      margin-top: 10px;
+      min-height: 140px;
     }}
 
     .advice img {{
@@ -162,108 +132,13 @@ html_code = f"""
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }}
 
-    .results-value {{
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 8px;
-      transition: color 0.3s;
-      text-align: center;
-    }}
-
-    .result {{
-      text-align: center;
-      margin: 30px 0;
-    }}
-
-    .meta {{
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      margin-top: 30px;
-    }}
-
-    .percent {{
-      font-size: 22px;
-      font-weight: 700;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }}
-
-    .percent small {{
-      font-size: 16px;
-      color: #000000;
-      font-weight: 500;
-    }}
-
-    .btn {{
-      width: 85%;
-      max-width: 280px;
-      padding: 15px;
-      border-radius: 12px;
-      border: 2px solid #2e7d32;
-      background: #fffdf7;
-      text-align: center;
-      font-weight: 560;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      font-family: 'Rubik', sans-serif;
-      font-size: 1.1em;
-    }}
-
-    .button-group {{
-      width: 85%;
-      max-width: 280px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      justify-content: center;
-    }}
-
-    .toggle-btn {{
-      width: 100%;
-      background: none;
-      border: none;
-      font-size: 1.1em;
-      font-weight: 565;
-      color: #2f8b3e;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0;
-    }}
-
-    .arrow {{
-      display: inline-block;
-      transition: transform 0.3s ease;
-      font-weight: 700;
-      font-size: 1.2em;
-    }}
-
-    .toggle-btn[aria-expanded="true"] .arrow {{
-      transform: rotate(180deg);
-    }}
-
-    .toggle-content {{
-      margin-top: 12px;
-      font-size: 1em;
-      line-height: 1.4;
-      color: #333;
-    }}
-
-    .toggle-content img {{
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
-    }}
-
-    .toggle-section {{
-      margin-top: 25px;
+    .confidence {{
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      font-size: 12px;
+      color: #666;
+      font-style: italic;
     }}
   </style>
 </head>
@@ -272,90 +147,38 @@ html_code = f"""
   <div class="logo">Fruit<br>Safe</div>
 
   <div class="results-label">ผลการตรวจ</div>
-  
-  <div class="result" role="status" aria-live="polite">
-    <div id="result" class="results-value"></div>
-    <div id="advice" class="advice"></div>
-  </div>
-
-  <div class="meta">
-    <div class="percent" id="percentDisplay"><small>สารตกค้าง</small> --%</div>
-    <div class="button-group">
-      <button class="btn" onclick="openLink()">วิธีการล้างฝรั่ง</button>
-    </div>
-  </div>
-
-  <div class="toggle-section">
-    <button class="toggle-btn" aria-expanded="false" aria-controls="info1" onclick="toggleInfo('info1', this)">
-       <span style="border-bottom: 2px solid #2f8b3e;">สารเคมีผลกระทบคืออะไร</span>
-      <span class="arrow">▼</span>
-    </button>
-    <div id="info1" class="toggle-content" hidden>
-      <img src="data:image/jpeg;base64,{poster_b64}" alt="โปสเตอร์สารเคมี organophosphate และ Carbamate" style="max-width:100%; height:auto;">
-    </div>
-  </div>
+  <div id="advice" class="advice"></div>
+  <div id="confidence" class="confidence"></div>
 
   <script>
     function showPrediction(value) {{
       const adviceEl = document.getElementById('advice');
-      const resultEl = document.getElementById('result');
-      const percentEl = document.getElementById('percentDisplay');
+      const confEl = document.getElementById('confidence');
 
-      let color = '';
       let advice = '';
       let imgSrc = '';
       let imgAlt = '';
 
       if (value <= 20) {{
-        color = 'green';
-        advice = '<span style="font-size: 2em; color: green;">เสี่ยงต่ำ ปลอดภัย</span>';
+        advice = '<span style="font-size: 1.6em; color: green;">ปลอดภัย</span>';
         imgSrc = "data:image/png;base64,{img1_b64}";
-        imgAlt = 'รูปความเสี่ยงต่ำ';
+        imgAlt = 'รูปปลอดภัย';
       }} else if (value <= 40) {{
-        color = '#e67e22';
-        advice = '<span style="font-size: 2em; color: #e67e22;">เสี่ยงปานกลาง</span><br> ' +
-                 '<span style="font-size: 1.3em">ควรล้างผลไม้เพิ่ม และตรวจอีกครั้ง</span>';
+        advice = '<span style="font-size: 1.6em; color: #e67e22;">เสี่ยงปานกลาง</span><br>' +
+                 '<span style="font-size: 1.1em">ควรล้างผลไม้เพิ่ม และตรวจอีกครั้ง</span>';
         imgSrc = "data:image/png;base64,{img3_b64}";
-        imgAlt = 'รูปความเสี่ยงปานกลาง';
+        imgAlt = 'รูปเสี่ยงปานกลาง';
       }} else {{
-        color = 'red';
-        advice = '<span style="font-size: 2em; color: red;">เสี่ยงสูง!</span><br>' +
-                 '<span style="font-size: 1.3em;">ต้องล้างผลไม้เพิ่มหลายรอบ และตรวจอีกครั้ง</span><br>';
+        advice = '<span style="font-size: 1.6em; color: red;">เสี่ยงสูง!</span><br>' +
+                 '<span style="font-size: 1.1em;">ควรล้างผลไม้เพิ่มหลายรอบ และตรวจอีกครั้ง</span>';
         imgSrc = "data:image/png;base64,{img0_b64}";
-        imgAlt = 'รูปความเสี่ยงสูง';
+        imgAlt = 'รูปเสี่ยงสูง';
       }}
 
-      resultEl.textContent = '';
-      percentEl.innerHTML = '<small>สารตกค้าง</small> ' + value + '%';
-      percentEl.style.color = color;
-      adviceEl.innerHTML = advice + `<br><img src="${{imgSrc}}" alt="${{imgAlt}}">`;
-    }}
+      advice += `<br><img src="${{imgSrc}}" alt="${{imgAlt}}">`;
 
-    function showDefaultState() {{
-      const adviceEl = document.getElementById('advice');
-      const resultEl = document.getElementById('result');
-      const percentEl = document.getElementById('percentDisplay');
-      
-      resultEl.textContent = '';
-      percentEl.innerHTML = '<small>สารตกค้าง</small> --%';
-      percentEl.style.color = '#666';
-      adviceEl.innerHTML = '<span style="font-size: 1.4em; color: #666;">รอข้อมูล...</span>';
-    }}
-
-    function openLink() {{
-      window.open('https://youtube.com/shorts/H2OW4IHmfYM?feature=share/', '_blank');
-    }}
-
-    function toggleInfo(id, btn) {{
-      const content = document.getElementById(id);
-      const expanded = btn.getAttribute("aria-expanded") === "true";
-      if (expanded) {{
-        content.hidden = true;
-        btn.setAttribute("aria-expanded", "false");
-      }} else {{
-        content.hidden = false;
-        btn.setAttribute("aria-expanded", "true");
-      }}
+      adviceEl.innerHTML = advice;
+      confEl.innerHTML = `Confidence: ${{value}}%`;
     }}
 
     {call_show_prediction_js}
@@ -364,8 +187,4 @@ html_code = f"""
 </html>
 """
 
-st.components.v1.html(html_code, height=1200, scrolling=False)
-
-
-
-
+st.components.v1.html(html_code, height=700, scrolling=False)
