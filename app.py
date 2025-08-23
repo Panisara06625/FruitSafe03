@@ -370,4 +370,3 @@ st.components.v1.html(html_code, height=1200, scrolling=False)
 
 
 
-
