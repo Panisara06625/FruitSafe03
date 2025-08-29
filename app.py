@@ -285,7 +285,7 @@ body {{
 </div>
 
 <div class="meta">
-  <div class="percent" id="percentDisplay"><small>สารตกค้าง</small> --%</div>
+  <div class="percent" id="percentDisplay"><small>โอกาสสารตกค้างสูงกว่าค่ามาตรฐาน</small> --%</div>
   <div class="button-group">
     <button class="btn" onclick="openLink()">วิธีล้างฝรั่ง</button>
     <button class="btn" onclick="openModal()">ผลกระทบของสารเคมี</button>
@@ -312,12 +312,12 @@ function showPrediction(value) {{
   let imgSrc = '';
   let imgAlt = '';
 
-  if (value <= 20) {{
+  if (value <= 30) {{
     color = 'green';
     advice = '<span style="font-size: 2em; color: green;">เสี่ยงต่ำ ปลอดภัย</span>';
     imgSrc = "data:image/png;base64,{img1_b64}";
     imgAlt = 'รูปความเสี่ยงต่ำ';
-  }} else if (value <= 40) {{
+  }} else if (value <= 60) {{
     color = '#e67e22';
     advice = '<span style="font-size: 2em; color: #e67e22;">เสี่ยงปานกลาง</span><br> ' +
              '<span style="font-size: 1.3em">ควรล้างผลไม้เพิ่ม และตรวจอีกครั้ง</span>';
@@ -332,7 +332,7 @@ function showPrediction(value) {{
   }}
 
   resultEl.textContent = '';
-  percentEl.innerHTML = '<small>สารตกค้าง</small> ' + value + '%';
+  percentEl.innerHTML = '<small>โอกาสสารตกค้างสูงกว่าค่ามาตรฐาน</small> ' + value + '%';
   percentEl.style.color = color;
   adviceEl.innerHTML = advice + `<br><img src="${{imgSrc}}" alt="${{imgAlt}}">`;
 }}
@@ -344,7 +344,7 @@ function showDefaultState() {{
 
   // push elements down same as result state
   resultEl.textContent = '';
-  percentEl.innerHTML = '<small>สารตกค้าง</small> --%';
+  percentEl.innerHTML = '<small>โอกาสสารตกค้างสูงกว่าค่ามาตรฐาน</small> --%';
   percentEl.style.color = '#666';
   adviceEl.innerHTML = '';
 }}
@@ -370,6 +370,10 @@ function openLink() {{
 """
 
 st.components.v1.html(html_code, height=800, scrolling=True)
+
+
+
+
 
 
 
